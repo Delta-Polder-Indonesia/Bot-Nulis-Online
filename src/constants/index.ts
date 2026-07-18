@@ -4,6 +4,7 @@ export const LINE_HEIGHT_DEFAULT = 32;
 export const MARGIN_TOP_DEFAULT = 110;
 export const MARGIN_LEFT_DEFAULT = 140;
 
+// Font yang ditampilkan sebagai tombol grid (TIDAK DIUBAH)
 export const FONT_OPTIONS = [
   "Kalam",
   "Caveat",
@@ -11,6 +12,104 @@ export const FONT_OPTIONS = [
   "Patrick Hand",
   "Shadows Into Light",
   "Coming Soon",
+];
+
+// Font tambahan dalam select/dropdown
+export const FONT_OPTIONS_EXTRA = [
+  {
+    group: "Handwriting Klasik",
+    fonts: [
+      "Dancing Script",
+      "Great Vibes",
+      "Pacifico",
+      "Sacramento",
+      "Satisfy",
+      "Marck Script",
+      "Cookie",
+      "Tangerine",
+    ],
+  },
+  {
+    group: "Tulisan Tangan Kasual",
+    fonts: [
+      "Architects Daughter",
+      "Reenie Beanie",
+      "Rock Salt",
+      "Homemade Apple",
+      "Just Another Hand",
+      "Waiting for the Sunrise",
+      "Covered By Your Grace",
+      "Cedarville Cursive",
+      "La Belle Aurore",
+      "Give You Glory",
+    ],
+  },
+  {
+    group: "Catatan & Papan Tulis",
+    fonts: [
+      "Permanent Marker",
+      "Handlee",
+      "Schoolbell",
+      "Short Stack",
+      "Nothing You Could Do",
+      "Annie Use Your Telescope",
+      "Amatic SC",
+      "Gloria Hallelujah",
+      "Neucha",
+      "Sue Ellen Francisco",
+    ],
+  },
+  {
+    group: "Kursif Elegan",
+    fonts: [
+      "Alex Brush",
+      "Allura",
+      "Parisienne",
+      "Courgette",
+      "Italianno",
+      "Damion",
+      "Mr Dafoe",
+      "Ruthie",
+      "Monsieur La Doulaise",
+      "Mrs Saint Delafield",
+    ],
+  },
+  {
+    group: "Modern Handwriting",
+    fonts: [
+      "Satisfy",
+      "Yellowtail",
+      "Bad Script",
+      "Yesteryear",
+      "Rochester",
+      "Herr Von Muellerhoff",
+      "Leckerli One",
+      "Norican",
+      "Niconne",
+      "Euphoria Script",
+    ],
+  },
+  {
+    group: "Gaya Anak & Playful",
+    fonts: [
+      "Pangolin",
+      "Patrick Hand SC",
+      "Mali",
+      "Sriracha",
+      "Itim",
+      "Charm",
+      "Maitree",
+      "Kanit",
+      "Prompt",
+      "Sarabun",
+    ],
+  },
+];
+
+// Gabungan semua font (untuk loading)
+export const ALL_FONTS = [
+  ...FONT_OPTIONS,
+  ...FONT_OPTIONS_EXTRA.flatMap((group) => group.fonts),
 ];
 
 export const INK_COLORS = [
