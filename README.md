@@ -43,3 +43,33 @@ Untuk memastikan deployment berjalan sempurna, di repositori ini telah ditambahk
 6. Selesai! Setiap kali Anda melakukan *push* ke branch `main`, GitHub Actions akan otomatis melakukan *build* aplikasi ini (lengkap dengan konfigurasi base path yang benar) dan menampilkannya di GitHub Pages tanpa error layar putih.
 
 *(Proses deploy bisa dilihat di tab **Actions** pada repository Anda. Setelah indikatornya hijau/selesai, klik link URL yang diberikan untuk melihat website).*
+
+## Ringkasan Semua Perubahan
+
+| File | Status | Perubahan Utama |
+|---|---|---|
+| `types/index.ts` | ✅ Baru | Tambah `Preset`, `TextStats`, `PaperContentProps` |
+| `constants/index.ts` | ✅ Upgrade | Tambah storage keys, default text |
+| `utils/seededRandom.ts` | 🆕 Baru | Fix bug `Math.random()` di render |
+| `hooks/useUndoRedo.ts` | 🆕 Baru | Fitur undo/redo teks |
+| `hooks/useTextStats.ts` | 🆕 Baru | Word count, reading time |
+| `hooks/usePresets.ts` | 🆕 Baru | Save/load preset ke localStorage |
+| `hooks/useLocalStorage.ts` | 🆕 Baru | Auto-save semua state |
+| `hooks/useContainerScale.ts` | ✅ Upgrade | Lebih robust |
+| `hooks/usePagination.ts` | ✅ Upgrade | Fix infinite loop, lebih stabil |
+| `hooks/useFullscreenScale.ts` | ✅ Upgrade | Cleanup lebih bersih |
+| `components/ErrorBoundary.tsx` | 🆕 Baru | Catch crash gracefully |
+| `components/MathRenderer.tsx` | ✅ Fix Bug | Pakai seeded random, fallback error |
+| `components/ShapeRenderer.tsx` | ✅ Fix Bug | useMemo + seeded random |
+| `components/Header.tsx` | ✅ Upgrade | Tambah tombol download langsung |
+| `components/FullscreenToolbar.tsx` | ✅ Upgrade | UI lebih bersih |
+| `components/TextEditor.tsx` | ✅ Upgrade | Undo/redo, stats, keyboard shortcut |
+| `components/IdentityEditor.tsx` | ✅ Upgrade | useCallback, empty state |
+| `components/PresetManager.tsx` | 🆕 Baru | UI simpan/muat preset |
+| `components/FormattingTools.tsx` | ✅ Upgrade | Komponen Slider reusable, aria |
+| `components/EditorPanel.tsx` | ✅ Upgrade | Tambah PresetManager |
+| `components/PaperLines.tsx` | ✅ Upgrade | React.memo |
+| `components/PaperContent.tsx` | ✅ Fix Bug | useMemo segments, seeded random |
+| `components/PaperPage.tsx` | ✅ Upgrade | React.memo, callback ref |
+| `components/PaperPreview.tsx` | ✅ Fix Bug | Fix conditional ref dengan useCallback |
+| `App.tsx` | ✅ Upgrade | useLocalStorage, useCallback, ErrorBoundary |

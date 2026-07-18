@@ -1,0 +1,72 @@
+export const PAPER_WIDTH = 794;
+export const PAPER_HEIGHT = 1224;
+export const LINE_HEIGHT_DEFAULT = 32;
+export const MARGIN_TOP_DEFAULT = 110;
+export const MARGIN_LEFT_DEFAULT = 140;
+
+export const FONT_OPTIONS = [
+  "Kalam",
+  "Caveat",
+  "Indie Flower",
+  "Patrick Hand",
+  "Shadows Into Light",
+  "Coming Soon",
+];
+
+export const INK_COLORS = [
+  "#1a237e",
+  "#0d47a1",
+  "#1b1b1b",
+  "#0a3d62",
+  "#004d40",
+  "#991b1b",
+];
+
+export const LINE_COLORS = [
+  { color: "#1e3a8a", label: "Biru Tua" },
+  { color: "#000000", label: "Hitam" },
+  { color: "#dc2626", label: "Merah" },
+  { color: "#16a34a", label: "Hijau" },
+  { color: "#9333ea", label: "Ungu" },
+];
+
+export const MATH_SYMBOLS = [
+  { label: "Pecahan", value: "$$\\frac{a}{b}$$", display: "a/b" },
+  { label: "Akar", value: "$$\\sqrt{x}$$", display: "√x" },
+  { label: "Pangkat", value: "$$x^2$$", display: "x²" },
+  { label: "Subskrip", value: "$$x_1$$", display: "x₁" },
+  { label: "Limit", value: "$$\\lim_{x \\to 0}$$", display: "lim" },
+  { label: "Sigma", value: "$$\\sum_{i=1}^{n}$$", display: "Σ" },
+  { label: "Integral", value: "$$\\int_{a}^{b}$$", display: "∫" },
+  { label: "±", value: "±", display: "±" },
+  { label: "×", value: "×", display: "×" },
+  { label: "÷", value: "÷", display: "÷" },
+  { label: "≠", value: "≠", display: "≠" },
+  { label: "≤", value: "≤", display: "≤" },
+  { label: "≥", value: "≥", display: "≥" },
+  { label: "∞", value: "∞", display: "∞" },
+  { label: "°", value: "°", display: "°" },
+  { label: "π", value: "π", display: "π" },
+  { label: "θ", value: "θ", display: "θ" },
+  { label: "α", value: "α", display: "α" },
+  { label: "β", value: "β", display: "β" },
+  { label: "γ", value: "γ", display: "γ" },
+  { label: "Δ", value: "Δ", display: "Δ" },
+];
+
+export const DEFAULT_TEXT = `Contoh soal tulisan tangan:
+
+Jika $$\\frac{1}{2}$$ + $$\\frac{1}{4}$$ = $$\\frac{3}{4}$$
+
+Maka $$\\sqrt{\\frac{9}{16}}$$ = $$\\frac{3}{4}$$
+
+Rumus: $$x^2$$ + $$y^2$$ = $$z^2$$
+
+Integral: $$\\int_{0}^{1} x^2 dx$$ = $$\\frac{1}{3}$$
+
+Limit: $$\\lim_{x \\to 0} \\frac{\\sin x}{x}$$ = 1`;
+
+export const STORAGE_KEY_PRESETS = "botnulis-presets";
+export const STORAGE_KEY_SETTINGS = "botnulis-settings";
+export const STORAGE_KEY_TEXT = "botnulis-text";
+export const STORAGE_KEY_IDENTITIES = "botnulis-identities";
