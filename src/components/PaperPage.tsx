@@ -25,6 +25,7 @@ const PaperPage = memo(function PaperPage({
     showMarginLine,
     lineColor,
     paperPattern = "folio",
+    textVerticalPosition = "line",
   } = settings;
 
   const hasIdentities = identities.some((item) => item.label || item.value);
@@ -144,6 +145,7 @@ const PaperPage = memo(function PaperPage({
         lineHeight={lineHeight}
         inkColor={inkColor}
         handwritingRoughness={handwritingRoughness}
+        textVerticalPosition={textVerticalPosition}
         onContentRef={onContentRef}
       />
 

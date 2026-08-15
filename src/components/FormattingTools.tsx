@@ -7,6 +7,7 @@ import {
   Sliders,
   Palette,
   FileSpreadsheet,
+  AlignVerticalJustifyCenter,
 } from "lucide-react";
 import {
   FONT_OPTIONS,
@@ -14,7 +15,7 @@ import {
   INK_COLORS,
   LINE_COLORS,
 } from "../constants";
-import type { PaperPattern, PaperSettings } from "../types";
+import type { PaperPattern, PaperSettings, TextVerticalPosition } from "../types";
 import { useFontLoader } from "../hooks/useFontLoader";
 
 interface FormattingToolsProps {
@@ -62,6 +63,120 @@ function Slider({
         onChange={(e) => onChange(+e.target.value)}
         className="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-full cursor-pointer transition-all"
       />
+    </div>
+  );
+}
+
+// ─── POSISI TULISAN DI GARIS (DUDUK DI GARIS / TENGAH-TENGAH) ─────────
+interface TextPositionPreviewProps {
+  mode: TextVerticalPosition;
+  fontFamily: string;
+}
+
+function TextPositionPreview({ mode, fontFamily }: TextPositionPreviewProps) {
+  const safeFamily = fontFamily.includes(" ")
+    ? `"${fontFamily}"`
+    : fontFamily;
+  return (
+    <svg viewBox="0 0 56 22" className="w-full h-6" aria-hidden="true">
+      {/* Dua garis buku pembatas */}
+      <line
+        x1="1"
+        y1="4"
+        x2="55"
+        y2="4"
+        stroke="#94a3b8"
+        strokeWidth="0.9"
+        opacity="0.8"
+      />
+      <line
+        x1="1"
+        y1="18"
+        x2="55"
+        y2="18"
+        stroke="#94a3b8"
+        strokeWidth="0.9"
+        opacity="0.8"
+      />
+      {/* Contoh huruf: mode "line" -> duduk di garis bawah, mode "middle" -> di tengah */}
+      <text
+        x="28"
+        y={mode === "line" ? 16 : 11}
+        fontSize="11"
+        textAnchor="middle"
+        fill="currentColor"
+        style={{
+          fontFamily: `${safeFamily}, cursive, sans-serif`,
+          fontWeight: 500,
+        }}
+      >
+        Ag
+      </text>
+    </svg>
+  );
+}
+
+interface TextVerticalPositionControlProps {
+  value: TextVerticalPosition;
+  fontFamily: string;
+  onChange: (mode: TextVerticalPosition) => void;
+}
+
+const TEXT_POSITION_OPTIONS: {
+  id: TextVerticalPosition;
+  label: string;
+  hint: string;
+}[] = [
+  { id: "line", label: "Di Atas Garis", hint: "Tulisan duduk di garis buku" },
+  { id: "middle", label: "Tengah-tengah", hint: "Di antara dua garis buku" },
+];
+
+function TextVerticalPositionControl({
+  value,
+  fontFamily,
+  onChange,
+}: TextVerticalPositionControlProps) {
+  return (
+    <div className="pt-1">
+      <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+        <AlignVerticalJustifyCenter size={14} className="text-blue-600" />
+        Posisi Tulisan di Garis
+      </p>
+      <div className="grid grid-cols-2 gap-1.5">
+        {TEXT_POSITION_OPTIONS.map((item) => {
+          const active = value === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onChange(item.id)}
+              aria-pressed={active}
+              title={item.hint}
+              className={`px-2 pt-2 pb-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                active
+                  ? "bg-blue-50 border-blue-500 ring-2 ring-blue-100"
+                  : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+              }`}
+            >
+              <TextPositionPreview mode={item.id} fontFamily={fontFamily} />
+              <span
+                className={`block text-[11px] mt-1 font-semibold ${
+                  active ? "text-blue-700" : "text-gray-600"
+                }`}
+              >
+                {item.label}
+              </span>
+              <span
+                className={`block text-[9px] mt-0.5 ${
+                  active ? "text-blue-500/80" : "text-gray-400"
+                }`}
+              >
+                {item.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -341,6 +456,7 @@ export default function FormattingTools({
     inkColor,
     lineColor,
     paperPattern = "folio",
+    textVerticalPosition = "line",
   } = settings;
 
   const { loadFont } = useFontLoader();
@@ -435,6 +551,13 @@ export default function FormattingTools({
           min={24}
           max={48}
           onChange={(v) => onUpdate("lineHeight", v)}
+        />
+
+        {/* Mode posisi tulisan: duduk di garis / tengah-tengah */}
+        <TextVerticalPositionControl
+          value={textVerticalPosition}
+          fontFamily={fontFamily}
+          onChange={(mode) => onUpdate("textVerticalPosition", mode)}
         />
 
         <div>

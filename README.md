@@ -22,6 +22,7 @@ Aplikasi web modern berbasis **React 19**, **Vite**, dan **Tailwind CSS** untuk 
 - 🎛️ **Kustomisasi Presisi**:
   - Ukuran font (14px – 28px).
   - Jarak antar baris kertas (24px – 48px).
+  - **Posisi Tulisan di Garis**: mode *Di Atas Garis* (tulisan duduk menempel di garis buku, lengkap dengan ekor huruf g/j/p/q/y yang turun melewati garis — seperti menulis di folio sungguhan) atau mode *Tengah-tengah* (tulisan di tengah jarak antar garis).
   - Variasi ketidakteraturan tulisan / roughness (0% sangat rapi – 100% kasual).
   - Margin atas & margin kiri kertas.
   - Pilihan warna tinta pulpen (Biru Standar, Biru Gelap, Hitam Natural, Dongker, Hijau Gelap, Cokelat Vintage, Merah, Ungu) + *Custom Color Picker*.

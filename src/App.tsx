@@ -30,6 +30,7 @@ const DEFAULT_SETTINGS: PaperSettings = {
   showMarginLine: true,
   lineColor: "#1e3a8a",
   paperPattern: "folio",
+  textVerticalPosition: "line",
 };
 
 const DEFAULT_IDENTITIES: IdentityField[] = [

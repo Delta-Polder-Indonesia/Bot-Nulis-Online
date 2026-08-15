@@ -1,5 +1,12 @@
 export type PaperPattern = "folio" | "grid" | "blank";
 
+/**
+ * Posisi vertikal tulisan terhadap garis-garis kertas:
+ * - "line"   : tulisan "duduk" di atas garis (bawah huruf menyentuh garis)
+ * - "middle" : tulisan di tengah-tengah jarak antar garis
+ */
+export type TextVerticalPosition = "line" | "middle";
+
 export interface IdentityField {
   id: string;
   label: string;
@@ -35,6 +42,8 @@ export interface PaperSettings {
   showMarginLine: boolean;
   lineColor: string;
   paperPattern?: PaperPattern;
+  /** Mode posisi tulisan terhadap garis: "line" (duduk di atas garis) | "middle" (tengah-tengah) */
+  textVerticalPosition?: TextVerticalPosition;
 }
 
 export interface PaperPageProps {
@@ -69,6 +78,7 @@ export interface PaperContentProps {
   lineHeight: number;
   inkColor: string;
   handwritingRoughness: number;
+  textVerticalPosition?: TextVerticalPosition;
   onContentRef?: (el: HTMLDivElement | null) => void;
 }
 

@@ -4,6 +4,7 @@ import type { IdentityField, PaperSettings } from "../types";
 import { useContainerScale } from "../hooks/useContainerScale";
 import { usePagination } from "../hooks/usePagination";
 import { useFullscreenScale } from "../hooks/useFullscreenScale";
+import { measureFontMetrics } from "../utils/textVerticalPosition";
 import FullscreenToolbar from "./FullscreenToolbar";
 import PaperPage from "./PaperPage";
 
@@ -34,10 +35,29 @@ export default function PaperPreview({
   const containerWidth = useContainerScale(wrapperRef);
   const scaleFullscreen = useFullscreenScale(isFullscreen);
 
-  const { marginTop, marginBottom, lineHeight } = settings;
+  const {
+    marginTop,
+    marginBottom,
+    lineHeight,
+    fontSize,
+    fontFamily,
+    textVerticalPosition = "line",
+  } = settings;
+
+  // Mode "line" (duduk di garis): ekor huruf (g, j, p, q, y) turun sedikit
+  // melewati garis, jadi sisakan ruang di bawah baris terakhir agar ekor huruf
+  // tidak tertutup margin bawah kertas.
+  const isLineMode = textVerticalPosition === "line";
+  const metrics = measureFontMetrics(fontSize, fontFamily);
+  const fitsInRow = metrics.ascent + metrics.descent <= lineHeight;
+  const descenderRoom =
+    isLineMode && fitsInRow ? metrics.descent + 2 : 0;
+
   const lineCount = Math.max(
     5,
-    Math.floor((PAPER_HEIGHT - marginTop - marginBottom) / lineHeight)
+    Math.floor(
+      (PAPER_HEIGHT - marginTop - marginBottom - descenderRoom) / lineHeight
+    )
   );
 
   const totalPages = usePagination(contentElement, {
