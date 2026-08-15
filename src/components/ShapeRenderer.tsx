@@ -5,13 +5,12 @@ import { seededRandom } from "../utils/seededRandom";
 export default function ShapeRenderer({
   type,
   color,
-  size = 60,
+  size = 50,
   lineHeight = 32,
   roughness = 2,
 }: ShapeRendererProps) {
-  const centerOffset = (lineHeight - size) / 2;
+  const centerOffset = Math.max(0, (lineHeight - size) / 2);
 
-  // Gunakan useMemo + seeded random agar tidak berubah setiap render
   const shapeData = useMemo(() => {
     const wobble = (val: number, seed: string) =>
       val + (seededRandom(`shape-${type}-${seed}`) - 0.5) * roughness;
@@ -26,8 +25,8 @@ export default function ShapeRenderer({
 
     if (type === "circle") {
       return {
-        rx: wobble(35, "rx"),
-        ry: wobble(35, "ry"),
+        rx: wobble(34, "rx"),
+        ry: wobble(34, "ry"),
       };
     }
 
@@ -37,7 +36,13 @@ export default function ShapeRenderer({
         y: wobble(20, "y"),
         w: wobble(60, "w"),
         h: wobble(60, "h"),
-        rotate: (seededRandom(`shape-square-rot`) - 0.5) * 2,
+        rotate: (seededRandom("shape-square-rot") - 0.5) * 2,
+      };
+    }
+
+    if (type === "star") {
+      return {
+        d: `M 50 ${wobble(10, "s1")} L ${wobble(62, "s2")} ${wobble(38, "s3")} L ${wobble(92, "s4")} ${wobble(38, "s5")} L ${wobble(68, "s6")} ${wobble(58, "s7")} L ${wobble(78, "s8")} ${wobble(88, "s9")} L 50 ${wobble(70, "s10")} L ${wobble(22, "s11")} ${wobble(88, "s12")} L ${wobble(32, "s13")} ${wobble(58, "s14")} L ${wobble(8, "s15")} ${wobble(38, "s16")} L ${wobble(38, "s17")} ${wobble(38, "s18")} Z`,
       };
     }
 
@@ -49,9 +54,11 @@ export default function ShapeRenderer({
     width: size,
     height: size,
     viewBox: "0 0 100 100",
+    className: "inline-block align-middle my-1",
     style: {
-      marginTop: Math.max(0, centerOffset),
-      display: "block" as const,
+      marginTop: `${centerOffset}px`,
+      display: "inline-block",
+      verticalAlign: "middle",
     },
   };
 
@@ -61,14 +68,10 @@ export default function ShapeRenderer({
         <feTurbulence
           type="fractalNoise"
           baseFrequency="0.04"
-          numOctaves="5"
+          numOctaves="4"
           result="noise"
         />
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="noise"
-          scale="2"
-        />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" />
       </filter>
     </defs>
   );
@@ -121,6 +124,15 @@ export default function ShapeRenderer({
           transform={`rotate(${shapeData.rotate}, 50, 50)`}
           {...strokeProps}
         />
+      </svg>
+    );
+  }
+
+  if (type === "star" && "d" in shapeData) {
+    return (
+      <svg {...svgProps}>
+        {roughFilter}
+        <path d={shapeData.d} {...strokeProps} />
       </svg>
     );
   }

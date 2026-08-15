@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Download, X } from "lucide-react";
 
 interface FullscreenToolbarProps {
@@ -7,7 +8,7 @@ interface FullscreenToolbarProps {
   onClose: () => void;
 }
 
-export default function FullscreenToolbar({
+const FullscreenToolbar = memo(function FullscreenToolbar({
   totalPages,
   isGenerating,
   onDownload,
@@ -16,40 +17,44 @@ export default function FullscreenToolbar({
   return (
     <div
       className="fixed top-4 left-1/2 -translate-x-1/2
-                 bg-white/10 backdrop-blur-md border border-white/20
-                 text-white px-4 py-3 rounded-2xl flex items-center
-                 gap-4 z-50 shadow-2xl"
+                 bg-gray-900/80 backdrop-blur-md border border-white/20
+                 text-white px-4 py-2.5 rounded-2xl flex items-center
+                 gap-3.5 z-50 shadow-2xl transition-all"
     >
-      <div className="text-xs leading-relaxed">
-        <span className="text-gray-300">Screenshot:</span>{" "}
-        <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-yellow-300 font-mono text-xs">
-          Win+Shift+S
+      <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-300">
+        <span>Keluar:</span>
+        <kbd className="bg-white/15 px-2 py-0.5 rounded text-yellow-300 font-mono text-[11px] font-bold border border-white/10">
+          ESC
         </kbd>
       </div>
 
-      <div className="h-6 w-px bg-white/30" />
+      <div className="hidden sm:block h-5 w-px bg-white/20" />
 
       <button
         onClick={onDownload}
         disabled={isGenerating}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50
-                   px-4 py-2 rounded-xl text-sm font-bold flex items-center
-                   gap-2 transition-all active:scale-95"
+        className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50
+                   px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center
+                   gap-2 transition-all active:scale-95 shadow-md cursor-pointer disabled:cursor-not-allowed"
       >
-        <Download size={16} />
-        {isGenerating ? "Menyimpan..." : `Download ${totalPages} PNG`}
+        <Download size={15} />
+        <span>
+          {isGenerating ? "Menyimpan..." : `Download ${totalPages} PNG`}
+        </span>
       </button>
 
       <button
         onClick={onClose}
-        className="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-xl
-                   text-sm font-bold flex items-center gap-2 transition-all
-                   active:scale-95"
+        className="bg-gray-800 hover:bg-gray-700 px-3.5 py-2 rounded-xl
+                   text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all
+                   active:scale-95 border border-white/10 cursor-pointer"
         aria-label="Tutup pratinjau"
       >
-        <X size={16} />
-        <span className="hidden sm:inline">Tutup</span>
+        <X size={15} />
+        <span>Tutup</span>
       </button>
     </div>
   );
-}
+});
+
+export default FullscreenToolbar;

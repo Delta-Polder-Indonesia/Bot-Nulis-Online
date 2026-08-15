@@ -1,17 +1,17 @@
 {
-  "name": "react-vite-tailwind",
+  "name": "bot-nulis-online",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Aplikasi Text to Handwriting Online di atas kertas folio dengan dukungan rumus matematika KaTeX",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "clsx": "2.1.1",
     "html-to-image": "^1.11.13",
-    "html2canvas": "^1.4.1",
     "lucide-react": "^0.577.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",

@@ -29,7 +29,7 @@ export default function EditorPanel({
   return (
     <div
       className="lg:col-span-4 space-y-4 overflow-y-auto pr-1
-                 pb-20 panel-scroll"
+                 pb-16 lg:pb-20 panel-scroll"
     >
       <TextEditor text={text} setText={setText} />
       <IdentityEditor

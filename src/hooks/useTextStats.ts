@@ -5,16 +5,16 @@ export function useTextStats(text: string): TextStats {
   return useMemo(() => {
     // Bersihkan LaTeX dan shape tags untuk perhitungan akurat
     const cleanText = text
-      .replace(/\$\$.*?\$\$/gs, "X") // Ganti math dengan 1 karakter
+      .replace(/\$\$.*?\$\$/gs, "X") // Ganti math block dengan 1 token
       .replace(/\[shape:.*?\]/g, ""); // Hapus shape tags
 
-    const charCount = cleanText.length;
+    const charCount = text.length;
     const words = cleanText
+      .trim()
       .split(/\s+/)
-      .filter((w) => w.trim().length > 0);
-    const wordCount = words.length;
-    const lineCount = text.split("\n").length;
-    // Rata-rata membaca 200 kata per menit
+      .filter((w) => w.length > 0);
+    const wordCount = text.trim().length === 0 ? 0 : words.length;
+    const lineCount = text.length === 0 ? 0 : text.split("\n").length;
     const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
     return {

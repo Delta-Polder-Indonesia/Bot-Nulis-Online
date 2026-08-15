@@ -1,6 +1,6 @@
 /**
- * Menghasilkan angka pseudo-random yang konsisten berdasarkan seed string.
- * Tidak akan berubah antar render seperti Math.random().
+ * Menghasilkan angka pseudo-random yang konsisten [0, 1) berdasarkan seed string.
+ * Deterministik sehingga tidak berubah antar render seperti Math.random().
  */
 export function seededRandom(seed: string): number {
   let hash = 0;
@@ -13,7 +13,7 @@ export function seededRandom(seed: string): number {
 }
 
 /**
- * Menghasilkan angka dalam range [min, max] berdasarkan seed.
+ * Menghasilkan angka dalam rentang [min, max] berdasarkan seed.
  */
 export function seededRandomRange(
   seed: string,
@@ -24,7 +24,7 @@ export function seededRandomRange(
 }
 
 /**
- * Menghasilkan rotasi kecil untuk efek tulisan tangan.
+ * Menghasilkan rotasi kecil untuk efek tulisan tangan alami.
  * Nilai antara -maxDeg sampai +maxDeg.
  */
 export function seededRotation(seed: string, maxDeg: number): number {

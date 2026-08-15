@@ -7,8 +7,10 @@ export function useLocalStorage<T>(
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch {
+      if (item === null) return initialValue;
+      return JSON.parse(item) as T;
+    } catch (e) {
+      console.warn(`Gagal membaca localStorage [${key}]:`, e);
       return initialValue;
     }
   });
@@ -21,18 +23,12 @@ export function useLocalStorage<T>(
     }
   }, [key, storedValue]);
 
-  const setValue = useCallback(
-    (value: T | ((prev: T) => T)) => {
-      setStoredValue((prev) => {
-        const next =
-          typeof value === "function"
-            ? (value as (prev: T) => T)(prev)
-            : value;
-        return next;
-      });
-    },
-    []
-  );
+  const setValue = useCallback((value: T | ((prev: T) => T)) => {
+    setStoredValue((prev) => {
+      const next = typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
+      return next;
+    });
+  }, []);
 
   return [storedValue, setValue];
 }

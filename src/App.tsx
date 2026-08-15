@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   DEFAULT_TEXT,
   LINE_HEIGHT_DEFAULT,
@@ -23,12 +23,13 @@ const DEFAULT_SETTINGS: PaperSettings = {
   fontSize: 18,
   lineHeight: LINE_HEIGHT_DEFAULT,
   inkColor: "#1a237e",
-  handwritingRoughness: 0.4,
+  handwritingRoughness: 0.35,
   marginTop: MARGIN_TOP_DEFAULT,
   marginBottom: 70,
   paddingLeft: MARGIN_LEFT_DEFAULT,
   showMarginLine: true,
-  lineColor: "#64748b",
+  lineColor: "#1e3a8a",
+  paperPattern: "folio",
 };
 
 const DEFAULT_IDENTITIES: IdentityField[] = [
@@ -39,7 +40,7 @@ const DEFAULT_IDENTITIES: IdentityField[] = [
 ];
 
 export default function App() {
-  // Persistent state via localStorage
+  // State dengan auto-save ke localStorage
   const [text, setText] = useLocalStorage(STORAGE_KEY_TEXT, DEFAULT_TEXT);
   const [settings, setSettings] = useLocalStorage(
     STORAGE_KEY_SETTINGS,
@@ -52,9 +53,9 @@ export default function App() {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [totalPagesForHeader, setTotalPagesForHeader] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Update satu key setting saja
+  // Update satu properti setting
   const updateSetting = useCallback(
     <K extends keyof PaperSettings>(key: K, value: PaperSettings[K]) => {
       setSettings((prev) => ({ ...prev, [key]: value }));
@@ -62,7 +63,7 @@ export default function App() {
     [setSettings]
   );
 
-  // Load preset langsung replace semua settings
+  // Load preset langsung menggantikan semua settings
   const handleLoadPreset = useCallback(
     (newSettings: PaperSettings) => {
       setSettings(newSettings);
@@ -70,43 +71,42 @@ export default function App() {
     [setSettings]
   );
 
-  // Hitung lineCount untuk keperluan download
-  const lineCount = useMemo(() => {
-    return Math.floor(
-      (PAPER_HEIGHT - settings.marginTop - settings.marginBottom) /
-        settings.lineHeight
-    );
-  }, [settings.marginTop, settings.marginBottom, settings.lineHeight]);
-
+  // Download high-resolution PNG untuk setiap halaman
   const handleDownload = useCallback(
-    async (totalPages: number) => {
-      if (totalPages === 0) return;
+    async (pagesToDownload: number) => {
+      if (pagesToDownload <= 0) return;
       setIsGenerating(true);
 
       try {
-        await document.fonts.ready;
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        if (document.fonts) {
+          await document.fonts.ready;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         const { toPng } = await import("html-to-image");
 
-        for (let i = 0; i < totalPages; i++) {
+        for (let i = 0; i < pagesToDownload; i++) {
           const originalElement = document.getElementById(`paper-page-${i}`);
           if (!originalElement) continue;
 
+          // Buat clone element di luar pandangan tapi tetap dalam viewport agar rendering 100% presisi
           const clone = originalElement.cloneNode(true) as HTMLDivElement;
 
           Object.assign(clone.style, {
             position: "fixed",
-            top: "-9999px",
-            left: "-9999px",
+            top: "0px",
+            left: "0px",
+            zIndex: "-9999",
             width: `${PAPER_WIDTH}px`,
             height: `${PAPER_HEIGHT}px`,
             transform: "none",
+            boxShadow: "none",
+            pointerEvents: "none",
           });
 
           document.body.appendChild(clone);
 
-          // Re-render KaTeX dalam clone
+          // Render ulang KaTeX jika ada rumus
           clone.querySelectorAll("[data-latex]").forEach((el) => {
             const span = el as HTMLSpanElement;
             const latex = span.dataset.latex;
@@ -119,66 +119,72 @@ export default function App() {
                   trust: true,
                 });
               } catch (e) {
-                console.error("KaTeX render error:", e);
+                console.error("KaTeX export render error:", e);
               }
             }
           });
 
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          // Tunggu sebentar untuk paint
+          await new Promise((resolve) => setTimeout(resolve, 200));
 
           const dataUrl = await toPng(clone, {
-            pixelRatio: 2,
+            pixelRatio: 2, // Resolusi tinggi (300 DPI equivalent)
             backgroundColor: "#faf8f2",
             width: PAPER_WIDTH,
             height: PAPER_HEIGHT,
-            style: { transform: "scale(1)", transformOrigin: "top left" },
+            style: {
+              transform: "scale(1)",
+              transformOrigin: "top left",
+            },
           });
 
           document.body.removeChild(clone);
 
+          // Trigger download
           const link = document.createElement("a");
           link.href = dataUrl;
-          link.download = `Tugas-Folio-Hal-${i + 1}-${Date.now()}.png`;
+          const pageSuffix = pagesToDownload > 1 ? `-Halaman-${i + 1}` : "";
+          link.download = `Tugas-Folio${pageSuffix}.png`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
 
-          // Jeda antar halaman agar browser tidak overwhelmed
-          if (i < totalPages - 1) {
+          // Jeda antar download jika ada beberapa halaman
+          if (i < pagesToDownload - 1) {
             await new Promise((r) => setTimeout(r, 400));
           }
         }
       } catch (error) {
         console.error("Download error:", error);
         alert(
-          "Gagal membuat gambar. Pastikan konten valid.\n" +
+          "Gagal mengekspor gambar. Pastikan browser mendukung Canvas HTML5.\n" +
             (error as Error).message
         );
       } finally {
         setIsGenerating(false);
       }
     },
-    [lineCount]
+    []
   );
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-100 flex flex-col font-sans text-gray-800">
+      <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-gray-800 selection:bg-blue-200">
         {!isFullscreen && (
           <Header
             onFullscreen={() => setIsFullscreen(true)}
-            onDownload={() => handleDownload(totalPagesForHeader)}
+            onDownload={() => handleDownload(totalPages)}
             isGenerating={isGenerating}
-            totalPages={totalPagesForHeader}
+            totalPages={totalPages}
           />
         )}
 
         <main
           className={`
             flex-1 max-w-[1600px] w-full mx-auto
-            ${isFullscreen ? "p-0" : "p-4 sm:p-6"}
-            grid grid-cols-1 lg:grid-cols-12 gap-6
-            ${isFullscreen ? "" : "h-[calc(100vh-64px)]"}
+            ${isFullscreen ? "p-0" : "p-3 sm:p-5 lg:p-6"}
+            grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6
+            ${isFullscreen ? "" : "lg:h-[calc(100vh-64px)]"}
           `}
         >
           {!isFullscreen && (
@@ -195,12 +201,14 @@ export default function App() {
 
           <ErrorBoundary
             fallback={
-              <div className="lg:col-span-8 flex items-center justify-center text-gray-500 bg-white rounded-2xl">
+              <div className="lg:col-span-8 flex items-center justify-center text-gray-500 bg-white rounded-3xl p-8 border border-gray-200">
                 <div className="text-center p-8">
                   <div className="text-4xl mb-3">📄</div>
-                  <p className="font-semibold">Preview tidak tersedia</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Periksa konten LaTeX atau settings Anda
+                  <p className="font-semibold text-gray-800">
+                    Pratinjau Kertas Tidak Tersedia
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Silakan periksa kembali formula atau pengaturan Anda
                   </p>
                 </div>
               </div>
@@ -213,10 +221,8 @@ export default function App() {
               isFullscreen={isFullscreen}
               isGenerating={isGenerating}
               onCloseFullscreen={() => setIsFullscreen(false)}
-              onDownload={(pages) => {
-                setTotalPagesForHeader(pages);
-                handleDownload(pages);
-              }}
+              onDownload={handleDownload}
+              onTotalPagesChange={setTotalPages}
             />
           </ErrorBoundary>
         </main>

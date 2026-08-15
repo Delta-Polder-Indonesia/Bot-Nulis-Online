@@ -16,7 +16,7 @@ export default function PaperContent({
   handwritingRoughness,
   onContentRef,
 }: PaperContentProps) {
-  // Pecah teks menjadi segments — di-memo agar tidak re-split setiap render
+  // Pecah teks menjadi segments (LaTeX, Shapes, dan Plain Text)
   const segments = useMemo(
     () => text.split(/(\$\$.*?\$\$|\[shape:.*?\])/gs),
     [text]
@@ -50,16 +50,18 @@ export default function PaperContent({
           style={{
             whiteSpace: "pre-wrap",
             wordWrap: "break-word",
+            wordBreak: "break-word",
             lineHeight: `${lineHeight}px`,
           }}
         >
           {segments.map((part, i) => {
-            // Render LaTeX
+            // 1. Render Rumus LaTeX
             if (part.startsWith("$$") && part.endsWith("$$")) {
+              const latexCode = part.slice(2, -2).trim();
               return (
                 <MathRenderer
-                  key={`math-${i}`}
-                  latex={part.slice(2, -2)}
+                  key={`math-${i}-${latexCode}`}
+                  latex={latexCode}
                   color={inkColor}
                   fontSize={fontSize}
                   fontFamily={fontFamily}
@@ -69,24 +71,25 @@ export default function PaperContent({
               );
             }
 
-            // Render Shape
+            // 2. Render Bentuk Geometri
             if (part.startsWith("[shape:") && part.endsWith("]")) {
+              const shapeType = part.slice(7, -1).trim();
               return (
                 <ShapeRenderer
-                  key={`shape-${i}`}
-                  type={part.slice(7, -1)}
+                  key={`shape-${i}-${shapeType}`}
+                  type={shapeType}
                   color={inkColor}
-                  size={lineHeight * 1.2}
+                  size={lineHeight * 1.15}
                   lineHeight={lineHeight}
-                  roughness={handwritingRoughness * 3}
+                  roughness={handwritingRoughness * 2.5}
                 />
               );
             }
 
-            // Render teks biasa dengan rotasi seeded
+            // 3. Render Teks Biasa dengan seeded jitter rotation
             const rotation = seededRotation(
-              `text-seg-${i}-${part.slice(0, 8)}`,
-              handwritingRoughness * 2
+              `text-seg-${i}-${part.slice(0, 10)}`,
+              handwritingRoughness * 1.8
             );
 
             return (
@@ -99,7 +102,6 @@ export default function PaperContent({
                   color: inkColor,
                   verticalAlign: "baseline",
                   display: "inline",
-                  // Rotasi kecil untuk efek tidak rapi
                   transform:
                     handwritingRoughness > 0
                       ? `rotate(${rotation}deg)`

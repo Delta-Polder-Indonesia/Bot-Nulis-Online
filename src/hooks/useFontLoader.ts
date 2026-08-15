@@ -1,29 +1,44 @@
 import { useState, useEffect, useCallback } from "react";
 
 interface FontLoaderReturn {
-  loadFont: (fontName: string) => void;
+  loadFont: (fontName: string) => Promise<void>;
   loadedFonts: Set<string>;
   isLoading: boolean;
   error: string | null;
 }
 
-// Cache global agar tidak load ulang
-const globalLoadedFonts = new Set<string>();
+// Cache global antar re-render
+const globalLoadedFonts = new Set<string>([
+  "Kalam",
+  "Caveat",
+  "Indie Flower",
+  "Patrick Hand",
+  "Shadows Into Light",
+  "Coming Soon",
+]);
 const loadingPromises = new Map<string, Promise<void>>();
 
 export function useFontLoader(): FontLoaderReturn {
   const [loadedFonts, setLoadedFonts] = useState<Set<string>>(
-    new Set(globalLoadedFonts)
+    () => new Set(globalLoadedFonts)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadFont = useCallback((fontName: string) => {
-    // Sudah dimuat
-    if (globalLoadedFonts.has(fontName)) return;
+  const loadFont = useCallback(async (fontName: string): Promise<void> => {
+    if (!fontName) return;
 
-    // Sedang dimuat
-    if (loadingPromises.has(fontName)) return;
+    if (globalLoadedFonts.has(fontName)) {
+      setLoadedFonts(new Set(globalLoadedFonts));
+      return;
+    }
+
+    const existingPromise = loadingPromises.get(fontName);
+    if (existingPromise) {
+      await existingPromise;
+      setLoadedFonts(new Set(globalLoadedFonts));
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -31,26 +46,32 @@ export function useFontLoader(): FontLoaderReturn {
     const encodedName = encodeURIComponent(fontName);
     const linkId = `font-${encodedName}`;
 
-    // Cek apakah <link> sudah ada
-    if (document.getElementById(linkId)) {
-      globalLoadedFonts.add(fontName);
-      setLoadedFonts(new Set(globalLoadedFonts));
-      setIsLoading(false);
-      return;
-    }
-
     const promise = new Promise<void>((resolve, reject) => {
+      // Cek apakah <link> sudah ada di DOM
+      if (document.getElementById(linkId)) {
+        globalLoadedFonts.add(fontName);
+        setLoadedFonts(new Set(globalLoadedFonts));
+        setIsLoading(false);
+        resolve();
+        return;
+      }
+
       const link = document.createElement("link");
       link.id = linkId;
       link.rel = "stylesheet";
-      link.href = `https://fonts.googleapis.com/css2?family=${encodedName.replace(/%20/g, "+")}&display=swap`;
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, "+")}&display=swap`;
 
       link.onload = () => {
         globalLoadedFonts.add(fontName);
         loadingPromises.delete(fontName);
         setLoadedFonts(new Set(globalLoadedFonts));
         setIsLoading(false);
-        resolve();
+
+        if (document.fonts) {
+          document.fonts.load(`16px "${fontName}"`).then(() => resolve()).catch(() => resolve());
+        } else {
+          resolve();
+        }
       };
 
       link.onerror = () => {
@@ -64,9 +85,15 @@ export function useFontLoader(): FontLoaderReturn {
     });
 
     loadingPromises.set(fontName, promise);
+
+    try {
+      await promise;
+    } catch {
+      // Error handled in state
+    }
   }, []);
 
-  // Muat font default saat pertama kali
+  // Pre-load default fonts
   useEffect(() => {
     const defaultFonts = [
       "Kalam",
@@ -76,8 +103,10 @@ export function useFontLoader(): FontLoaderReturn {
       "Shadows Into Light",
       "Coming Soon",
     ];
-    defaultFonts.forEach((f) => loadFont(f));
-  }, [loadFont]);
+    defaultFonts.forEach((f) => {
+      globalLoadedFonts.add(f);
+    });
+  }, []);
 
   return { loadFont, loadedFonts, isLoading, error };
 }

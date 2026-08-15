@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PAPER_HEIGHT } from "../constants";
+import { PAPER_HEIGHT, PAPER_WIDTH } from "../constants";
 
 export function useFullscreenScale(isFullscreen: boolean): number {
   const [scale, setScale] = useState(1);
@@ -11,8 +11,11 @@ export function useFullscreenScale(isFullscreen: boolean): number {
     }
 
     const updateScale = () => {
-      const availableHeight = window.innerHeight - 120;
-      const newScale = Math.min(availableHeight / PAPER_HEIGHT, 1);
+      const availableHeight = window.innerHeight - 130;
+      const availableWidth = window.innerWidth - 48;
+      const scaleHeight = availableHeight / PAPER_HEIGHT;
+      const scaleWidth = availableWidth / PAPER_WIDTH;
+      const newScale = Math.max(0.25, Math.min(scaleHeight, scaleWidth, 1.15));
       setScale(newScale);
     };
 

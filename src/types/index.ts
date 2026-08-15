@@ -1,3 +1,5 @@
+export type PaperPattern = "folio" | "grid" | "blank";
+
 export interface IdentityField {
   id: string;
   label: string;
@@ -32,6 +34,7 @@ export interface PaperSettings {
   paddingLeft: number;
   showMarginLine: boolean;
   lineColor: string;
+  paperPattern?: PaperPattern;
 }
 
 export interface PaperPageProps {
@@ -53,6 +56,7 @@ export interface PaperLinesProps {
   lineHeight: number;
   lineColor: string;
   showMarginLine: boolean;
+  paperPattern?: PaperPattern;
 }
 
 export interface PaperContentProps {
@@ -73,6 +77,7 @@ export interface Preset {
   name: string;
   settings: PaperSettings;
   createdAt: number;
+  isDefault?: boolean;
 }
 
 export interface TextStats {
@@ -82,8 +87,22 @@ export interface TextStats {
   readingTimeMinutes: number;
 }
 
+export interface KatexOptions {
+  displayMode?: boolean;
+  throwOnError?: boolean;
+  errorColor?: string;
+  macros?: Record<string, string>;
+  strict?: boolean | string;
+  trust?: boolean;
+}
+
+export interface KatexGlobal {
+  render: (latex: string, element: HTMLElement, options?: KatexOptions) => void;
+  renderToString: (latex: string, options?: KatexOptions) => string;
+}
+
 declare global {
   interface Window {
-    katex: any;
+    katex?: KatexGlobal;
   }
 }

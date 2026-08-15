@@ -1,3 +1,4 @@
+/* Custom smooth scrollbars */
 .panel-scroll::-webkit-scrollbar {
   width: 6px;
 }
@@ -12,9 +13,33 @@
   background: #94a3b8;
 }
 
+/* KaTeX handwritten styling integration */
 .math-handwritten .katex {
+  font-size: 1.02em;
+}
+
+.math-handwritten .katex .mathnormal {
+  font-family: inherit !important;
+  font-style: italic;
+}
+
+.math-handwritten .katex .mord.text {
   font-family: inherit !important;
 }
-.math-handwritten .katex * {
-  font-family: inherit !important;
+
+/* Range input styling */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
