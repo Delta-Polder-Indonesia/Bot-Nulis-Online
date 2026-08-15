@@ -20,6 +20,8 @@ export interface MathRendererProps {
   fontFamily: string;
   lineHeight: number;
   roughness?: number;
+  /** Perkecil rumus yang lebih tinggi dari satu baris agar muat dalam satu baris */
+  shrinkToLine?: boolean;
 }
 
 export interface ShapeRendererProps {
@@ -44,6 +46,8 @@ export interface PaperSettings {
   paperPattern?: PaperPattern;
   /** Mode posisi tulisan terhadap garis: "line" (duduk di atas garis) | "middle" (tengah-tengah) */
   textVerticalPosition?: TextVerticalPosition;
+  /** Perkecil otomatis rumus KaTeX yang lebih tinggi dari satu baris agar muat dalam satu baris */
+  shrinkMathToLine?: boolean;
 }
 
 export interface PaperPageProps {
@@ -79,6 +83,7 @@ export interface PaperContentProps {
   inkColor: string;
   handwritingRoughness: number;
   textVerticalPosition?: TextVerticalPosition;
+  shrinkMathToLine?: boolean;
   onContentRef?: (el: HTMLDivElement | null) => void;
 }
 

@@ -16,6 +16,7 @@ export default function PaperContent({
   inkColor,
   handwritingRoughness,
   textVerticalPosition = "line",
+  shrinkMathToLine = true,
   onContentRef,
 }: PaperContentProps) {
   // Pecah teks menjadi segments (LaTeX, Shapes, dan Plain Text)
@@ -96,6 +97,7 @@ export default function PaperContent({
                   fontFamily={fontFamily}
                   lineHeight={lineHeight}
                   roughness={handwritingRoughness}
+                  shrinkToLine={shrinkMathToLine}
                 />
               );
             }

@@ -26,6 +26,7 @@ const PaperPage = memo(function PaperPage({
     lineColor,
     paperPattern = "folio",
     textVerticalPosition = "line",
+    shrinkMathToLine = true,
   } = settings;
 
   const hasIdentities = identities.some((item) => item.label || item.value);
@@ -146,6 +147,7 @@ const PaperPage = memo(function PaperPage({
         inkColor={inkColor}
         handwritingRoughness={handwritingRoughness}
         textVerticalPosition={textVerticalPosition}
+        shrinkMathToLine={shrinkMathToLine}
         onContentRef={onContentRef}
       />
 

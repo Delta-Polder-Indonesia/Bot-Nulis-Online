@@ -8,6 +8,7 @@ import {
   Palette,
   FileSpreadsheet,
   AlignVerticalJustifyCenter,
+  Sigma,
 } from "lucide-react";
 import {
   FONT_OPTIONS,
@@ -457,6 +458,7 @@ export default function FormattingTools({
     lineColor,
     paperPattern = "folio",
     textVerticalPosition = "line",
+    shrinkMathToLine = true,
   } = settings;
 
   const { loadFont } = useFontLoader();
@@ -559,6 +561,35 @@ export default function FormattingTools({
           fontFamily={fontFamily}
           onChange={(mode) => onUpdate("textVerticalPosition", mode)}
         />
+
+        {/* Rumus matematika: perkecil agar muat dalam satu baris */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="min-w-0">
+            <span className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+              <Sigma size={14} className="text-blue-600" />
+              Rumus Muat 1 Baris
+            </span>
+            <p className="text-[10px] text-gray-400 mt-0.5 leading-snug">
+              Perkecil otomatis pecahan / matrix agar tidak menimpa baris di
+              bawahnya
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={shrinkMathToLine}
+            onClick={() => onUpdate("shrinkMathToLine", !shrinkMathToLine)}
+            className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer shrink-0
+                        focus:outline-none focus:ring-2 focus:ring-blue-400
+                        ${shrinkMathToLine ? "bg-blue-600" : "bg-slate-300"}`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white
+                          rounded-full shadow-xs transition-transform duration-200
+                          ${shrinkMathToLine ? "translate-x-4" : "translate-x-0"}`}
+            />
+          </button>
+        </div>
 
         <div>
           <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-600">

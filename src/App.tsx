@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: PaperSettings = {
   lineColor: "#1e3a8a",
   paperPattern: "folio",
   textVerticalPosition: "line",
+  shrinkMathToLine: true,
 };
 
 const DEFAULT_IDENTITIES: IdentityField[] = [
