@@ -7,6 +7,8 @@ import {
   Sliders,
   Palette,
   FileSpreadsheet,
+  AlignVerticalJustifyCenter,
+  Sigma,
 } from "lucide-react";
 import {
   FONT_OPTIONS,
@@ -14,7 +16,7 @@ import {
   INK_COLORS,
   LINE_COLORS,
 } from "../constants";
-import type { PaperPattern, PaperSettings } from "../types";
+import type { PaperPattern, PaperSettings, TextVerticalPosition } from "../types";
 import { useFontLoader } from "../hooks/useFontLoader";
 
 interface FormattingToolsProps {
@@ -62,6 +64,120 @@ function Slider({
         onChange={(e) => onChange(+e.target.value)}
         className="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-full cursor-pointer transition-all"
       />
+    </div>
+  );
+}
+
+// ─── POSISI TULISAN DI GARIS (DUDUK DI GARIS / TENGAH-TENGAH) ─────────
+interface TextPositionPreviewProps {
+  mode: TextVerticalPosition;
+  fontFamily: string;
+}
+
+function TextPositionPreview({ mode, fontFamily }: TextPositionPreviewProps) {
+  const safeFamily = fontFamily.includes(" ")
+    ? `"${fontFamily}"`
+    : fontFamily;
+  return (
+    <svg viewBox="0 0 56 22" className="w-full h-6" aria-hidden="true">
+      {/* Dua garis buku pembatas */}
+      <line
+        x1="1"
+        y1="4"
+        x2="55"
+        y2="4"
+        stroke="#94a3b8"
+        strokeWidth="0.9"
+        opacity="0.8"
+      />
+      <line
+        x1="1"
+        y1="18"
+        x2="55"
+        y2="18"
+        stroke="#94a3b8"
+        strokeWidth="0.9"
+        opacity="0.8"
+      />
+      {/* Contoh huruf: mode "line" -> duduk di garis bawah, mode "middle" -> di tengah */}
+      <text
+        x="28"
+        y={mode === "line" ? 16 : 11}
+        fontSize="11"
+        textAnchor="middle"
+        fill="currentColor"
+        style={{
+          fontFamily: `${safeFamily}, cursive, sans-serif`,
+          fontWeight: 500,
+        }}
+      >
+        Ag
+      </text>
+    </svg>
+  );
+}
+
+interface TextVerticalPositionControlProps {
+  value: TextVerticalPosition;
+  fontFamily: string;
+  onChange: (mode: TextVerticalPosition) => void;
+}
+
+const TEXT_POSITION_OPTIONS: {
+  id: TextVerticalPosition;
+  label: string;
+  hint: string;
+}[] = [
+  { id: "line", label: "Di Atas Garis", hint: "Tulisan duduk di garis buku" },
+  { id: "middle", label: "Tengah-tengah", hint: "Di antara dua garis buku" },
+];
+
+function TextVerticalPositionControl({
+  value,
+  fontFamily,
+  onChange,
+}: TextVerticalPositionControlProps) {
+  return (
+    <div className="pt-1">
+      <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+        <AlignVerticalJustifyCenter size={14} className="text-blue-600" />
+        Posisi Tulisan di Garis
+      </p>
+      <div className="grid grid-cols-2 gap-1.5">
+        {TEXT_POSITION_OPTIONS.map((item) => {
+          const active = value === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onChange(item.id)}
+              aria-pressed={active}
+              title={item.hint}
+              className={`px-2 pt-2 pb-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                active
+                  ? "bg-blue-50 border-blue-500 ring-2 ring-blue-100"
+                  : "bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100"
+              }`}
+            >
+              <TextPositionPreview mode={item.id} fontFamily={fontFamily} />
+              <span
+                className={`block text-[11px] mt-1 font-semibold ${
+                  active ? "text-blue-700" : "text-gray-600"
+                }`}
+              >
+                {item.label}
+              </span>
+              <span
+                className={`block text-[9px] mt-0.5 ${
+                  active ? "text-blue-500/80" : "text-gray-400"
+                }`}
+              >
+                {item.hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -341,6 +457,8 @@ export default function FormattingTools({
     inkColor,
     lineColor,
     paperPattern = "folio",
+    textVerticalPosition = "line",
+    shrinkMathToLine = true,
   } = settings;
 
   const { loadFont } = useFontLoader();
@@ -436,6 +554,42 @@ export default function FormattingTools({
           max={48}
           onChange={(v) => onUpdate("lineHeight", v)}
         />
+
+        {/* Mode posisi tulisan: duduk di garis / tengah-tengah */}
+        <TextVerticalPositionControl
+          value={textVerticalPosition}
+          fontFamily={fontFamily}
+          onChange={(mode) => onUpdate("textVerticalPosition", mode)}
+        />
+
+        {/* Rumus matematika: perkecil agar muat dalam satu baris */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="min-w-0">
+            <span className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+              <Sigma size={14} className="text-blue-600" />
+              Rumus Muat 1 Baris
+            </span>
+            <p className="text-[10px] text-gray-400 mt-0.5 leading-snug">
+              Perkecil otomatis pecahan / matrix agar tidak menimpa baris di
+              bawahnya
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={shrinkMathToLine}
+            onClick={() => onUpdate("shrinkMathToLine", !shrinkMathToLine)}
+            className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer shrink-0
+                        focus:outline-none focus:ring-2 focus:ring-blue-400
+                        ${shrinkMathToLine ? "bg-blue-600" : "bg-slate-300"}`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white
+                          rounded-full shadow-xs transition-transform duration-200
+                          ${shrinkMathToLine ? "translate-x-4" : "translate-x-0"}`}
+            />
+          </button>
+        </div>
 
         <div>
           <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-600">

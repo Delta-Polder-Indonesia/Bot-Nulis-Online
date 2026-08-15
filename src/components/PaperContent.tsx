@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import MathRenderer from "./MathRenderer";
 import ShapeRenderer from "./ShapeRenderer";
 import { seededRotation } from "../utils/seededRandom";
+import { computeTextVerticalLayout } from "../utils/textVerticalPosition";
 import type { PaperContentProps } from "../types";
 
 export default function PaperContent({
@@ -14,6 +15,8 @@ export default function PaperContent({
   lineHeight,
   inkColor,
   handwritingRoughness,
+  textVerticalPosition = "line",
+  shrinkMathToLine = true,
   onContentRef,
 }: PaperContentProps) {
   // Pecah teks menjadi segments (LaTeX, Shapes, dan Plain Text)
@@ -22,12 +25,38 @@ export default function PaperContent({
     [text]
   );
 
+  // Tick untuk memaksa re-render setelah font web selesai dimuat, agar metrik
+  // font (ascent/descent) yang dipakai untuk posisi vertikal akurat.
+  const [fontsTick, setFontsTick] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (mounted) setFontsTick((t) => t + 1);
+      });
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [fontFamily]);
+
+  // Geser blok tulisan: "line" = duduk di atas garis, "middle" = tengah-tengah.
+  // `overflow` adalah ruang ekstra di bawah baris terakhir tiap halaman untuk
+  // menampung "kaki" huruf ber-descender (g, j, p, q, y) di mode "line".
+  const { offset: verticalOffset, overflow } = useMemo(
+    () =>
+      computeTextVerticalLayout(textVerticalPosition, fontSize, fontFamily, lineHeight),
+    [textVerticalPosition, fontSize, fontFamily, lineHeight, fontsTick]
+  );
+
+  const pageHeight = lineCount * lineHeight;
+
   return (
     <div
       style={{
         position: "relative",
         zIndex: 1,
-        height: `${lineCount * lineHeight}px`,
+        height: `${pageHeight + overflow}px`,
         overflow: "hidden",
       }}
     >
@@ -35,7 +64,7 @@ export default function PaperContent({
         ref={pageIndex === 0 ? onContentRef : undefined}
         style={{
           position: "absolute",
-          top: `-${pageIndex * (lineCount * lineHeight)}px`,
+          top: `-${pageIndex * pageHeight + overflow}px`,
           left: 0,
           right: 0,
           paddingLeft: `${paddingLeft}px`,
@@ -44,6 +73,7 @@ export default function PaperContent({
           fontSize: `${fontSize}px`,
           lineHeight: `${lineHeight}px`,
           color: inkColor,
+          transform: `translateY(${verticalOffset}px)`,
         }}
       >
         <div
@@ -67,6 +97,7 @@ export default function PaperContent({
                   fontFamily={fontFamily}
                   lineHeight={lineHeight}
                   roughness={handwritingRoughness}
+                  shrinkToLine={shrinkMathToLine}
                 />
               );
             }
