@@ -9,7 +9,9 @@ export default function ShapeRenderer({
   lineHeight = 32,
   roughness = 2,
 }: ShapeRendererProps) {
-  const centerOffset = Math.max(0, (lineHeight - size) / 2);
+  // Posisikan bentuk agar pusatnya berada di tengah-tengah jarak antar garis,
+  // tanpa ikut menentukan tinggi line box (wrapper height: 0 + overflow visible).
+  const marginTop = (lineHeight - size) / 2;
 
   const shapeData = useMemo(() => {
     const wobble = (val: number, seed: string) =>
@@ -54,12 +56,20 @@ export default function ShapeRenderer({
     width: size,
     height: size,
     viewBox: "0 0 100 100",
-    className: "inline-block align-middle my-1",
     style: {
-      marginTop: `${centerOffset}px`,
-      display: "inline-block",
-      verticalAlign: "middle",
+      display: "block",
+      marginTop: `${marginTop}px`,
     },
+  };
+
+  // Wrapper "nol-tinggi": bentuk yang lebih tinggi dari satu baris tetap
+  // digambar utuh, tetapi tidak menambah tinggi line box sehingga baris
+  // berikutnya tidak terdorong turun.
+  const wrapperStyle: React.CSSProperties = {
+    display: "inline-block",
+    height: 0,
+    overflow: "visible",
+    verticalAlign: "top",
   };
 
   const roughFilter = (
@@ -85,57 +95,63 @@ export default function ShapeRenderer({
     style: { filter: `url(#roughPaper-${type})` },
   };
 
-  if (type === "triangle" && "p1" in shapeData) {
-    return (
-      <svg {...svgProps}>
-        {roughFilter}
-        <path
-          d={`M ${shapeData.p1} L ${shapeData.p2} L ${shapeData.p3} Z`}
-          {...strokeProps}
-        />
-      </svg>
-    );
-  }
+  const svg = (() => {
+    if (type === "triangle" && "p1" in shapeData) {
+      return (
+        <svg {...svgProps}>
+          {roughFilter}
+          <path
+            d={`M ${shapeData.p1} L ${shapeData.p2} L ${shapeData.p3} Z`}
+            {...strokeProps}
+          />
+        </svg>
+      );
+    }
 
-  if (type === "circle" && "rx" in shapeData) {
-    return (
-      <svg {...svgProps}>
-        {roughFilter}
-        <ellipse
-          cx="50"
-          cy="50"
-          rx={shapeData.rx}
-          ry={shapeData.ry}
-          {...strokeProps}
-        />
-      </svg>
-    );
-  }
+    if (type === "circle" && "rx" in shapeData) {
+      return (
+        <svg {...svgProps}>
+          {roughFilter}
+          <ellipse
+            cx="50"
+            cy="50"
+            rx={shapeData.rx}
+            ry={shapeData.ry}
+            {...strokeProps}
+          />
+        </svg>
+      );
+    }
 
-  if (type === "square" && "x" in shapeData) {
-    return (
-      <svg {...svgProps}>
-        {roughFilter}
-        <rect
-          x={shapeData.x}
-          y={shapeData.y}
-          width={shapeData.w}
-          height={shapeData.h}
-          transform={`rotate(${shapeData.rotate}, 50, 50)`}
-          {...strokeProps}
-        />
-      </svg>
-    );
-  }
+    if (type === "square" && "x" in shapeData) {
+      return (
+        <svg {...svgProps}>
+          {roughFilter}
+          <rect
+            x={shapeData.x}
+            y={shapeData.y}
+            width={shapeData.w}
+            height={shapeData.h}
+            transform={`rotate(${shapeData.rotate}, 50, 50)`}
+            {...strokeProps}
+          />
+        </svg>
+      );
+    }
 
-  if (type === "star" && "d" in shapeData) {
-    return (
-      <svg {...svgProps}>
-        {roughFilter}
-        <path d={shapeData.d} {...strokeProps} />
-      </svg>
-    );
-  }
+    if (type === "star" && "d" in shapeData) {
+      return (
+        <svg {...svgProps}>
+          {roughFilter}
+          <path d={shapeData.d} {...strokeProps} />
+        </svg>
+      );
+    }
 
-  return null;
+    return null;
+  })();
+
+  if (!svg) return null;
+
+  return <span style={wrapperStyle}>{svg}</span>;
 }

@@ -57,21 +57,28 @@ export default function MathRenderer({
     };
   }, [latex, fontFamily, fontSize]);
 
-  const baselineShift = fontSize * 0.1;
   const rotation = seededRotation(`math-rot-${latex}`, roughness * 3.5);
-  const scaleVar = 1 + (seededRandom(`math-scale-${latex}`) - 0.5) * roughness * 0.04;
+  const scaleVar =
+    1 + (seededRandom(`math-scale-${latex}`) - 0.5) * roughness * 0.04;
 
   const style: React.CSSProperties = {
     color,
     fontSize: `${fontSize}px`,
     fontFamily,
-    display: "inline-flex",
-    alignItems: "center",
+    // Wrapper "nol-tinggi" (height: 0) dengan overflow visible:
+    // - KaTeX yang lebih tinggi dari satu baris (pecahan, akar, matrix) tetap
+    //   digambar utuh melewati batas baris, TAPI
+    // - tidak ikut menentukan tinggi line box, sehingga baris-baris berikutnya
+    //   tidak terdorong turun (offsaid) seperti sebelumnya.
+    // vertical-align: baseline membuat baseline rumus otomatis sejajar dengan
+    // baseline teks di baris yang sama (baseline internal wrapper dihitung dari
+    // line-height & font-size yang sama dengan blok teks).
+    display: "inline-block",
+    height: 0,
+    overflow: "visible",
     verticalAlign: "baseline",
-    transform: `translateY(${baselineShift}px) rotate(${rotation}deg) scale(${scaleVar})`,
     lineHeight: `${lineHeight}px`,
-    height: `${lineHeight}px`,
-    position: "relative",
+    transform: `rotate(${rotation}deg) scale(${scaleVar})`,
   };
 
   return (
