@@ -11,6 +11,10 @@ const __dirname = path.dirname(__filename);
 // https://vite.dev/config/
 export default defineConfig({
   base: './', // Menghindari masalah blank putih di GitHub Pages
+  server: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: {

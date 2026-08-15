@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { PAPER_WIDTH, PAPER_HEIGHT } from "../constants";
 import type { IdentityField, PaperSettings } from "../types";
 import { useContainerScale } from "../hooks/useContainerScale";
@@ -15,6 +15,7 @@ interface PaperPreviewProps {
   isGenerating: boolean;
   onCloseFullscreen: () => void;
   onDownload: (totalPages: number) => void;
+  onTotalPagesChange?: (pages: number) => void;
 }
 
 export default function PaperPreview({
@@ -25,45 +26,53 @@ export default function PaperPreview({
   isGenerating,
   onCloseFullscreen,
   onDownload,
+  onTotalPagesChange,
 }: PaperPreviewProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentElement, setContentElement] = useState<HTMLDivElement | null>(null);
 
-  const containerWidth = useContainerScale(
-    wrapperRef as React.RefObject<HTMLDivElement>
-  );
-  const scaleProps = useFullscreenScale(isFullscreen);
+  const containerWidth = useContainerScale(wrapperRef);
+  const scaleFullscreen = useFullscreenScale(isFullscreen);
 
   const { marginTop, marginBottom, lineHeight } = settings;
-  const lineCount = Math.floor(
-    (PAPER_HEIGHT - marginTop - marginBottom) / lineHeight
+  const lineCount = Math.max(
+    5,
+    Math.floor((PAPER_HEIGHT - marginTop - marginBottom) / lineHeight)
   );
 
-  const totalPages = usePagination(
-    contentRef as React.RefObject<HTMLDivElement>,
-    {
-      text,
-      fontSize: settings.fontSize,
-      lineHeight: settings.lineHeight,
-      fontFamily: settings.fontFamily,
-      lineCount,
-    }
-  );
+  const totalPages = usePagination(contentElement, {
+    text,
+    fontSize: settings.fontSize,
+    lineHeight: settings.lineHeight,
+    fontFamily: settings.fontFamily,
+    lineCount,
+  });
 
-  // Callback ref yang stabil
-  const handleContentRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      (contentRef as React.MutableRefObject<HTMLDivElement | null>).current =
-        el;
-    },
-    []
-  );
+  // Sinkronisasi total halaman ke parent component
+  useEffect(() => {
+    onTotalPagesChange?.(totalPages);
+  }, [totalPages, onTotalPagesChange]);
+
+  // Shortcut tombol Escape untuk keluar dari fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        onCloseFullscreen();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen, onCloseFullscreen]);
+
+  const handleContentRef = useCallback((el: HTMLDivElement | null) => {
+    setContentElement(el);
+  }, []);
 
   const PADDING = isFullscreen ? 32 : 48;
   const displayScale = isFullscreen
-    ? scaleProps
+    ? scaleFullscreen
     : containerWidth > 0 && containerWidth < PAPER_WIDTH + PADDING
-      ? (containerWidth - PADDING) / PAPER_WIDTH
+      ? Math.max(0.2, (containerWidth - PADDING) / PAPER_WIDTH)
       : 1;
 
   const GAP = 32;
@@ -73,8 +82,8 @@ export default function PaperPreview({
       ref={wrapperRef}
       className={
         isFullscreen
-          ? "fixed inset-0 z-50 bg-gray-900 overflow-y-auto overflow-x-hidden flex flex-col items-center pt-24 pb-12"
-          : "lg:col-span-8 bg-gray-300/40 rounded-3xl p-4 sm:p-8 overflow-y-auto overflow-x-hidden flex flex-col items-center shadow-inner"
+          ? "fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-sm overflow-y-auto overflow-x-hidden flex flex-col items-center pt-24 pb-12"
+          : "lg:col-span-8 bg-slate-200/60 rounded-3xl p-4 sm:p-8 overflow-y-auto overflow-x-hidden flex flex-col items-center shadow-inner min-h-[500px]"
       }
     >
       {isFullscreen && (
@@ -86,13 +95,13 @@ export default function PaperPreview({
         />
       )}
 
-      {/* Container dengan ukuran scaled */}
+      {/* Container dengan ukuran yang sudah di-scale */}
       <div
         style={{
           height: `${(PAPER_HEIGHT * totalPages + GAP * (totalPages - 1)) * displayScale}px`,
           width: `${PAPER_WIDTH * displayScale}px`,
           position: "relative",
-          transition: "width 0.2s ease, height 0.2s ease",
+          transition: "width 0.15s ease-out, height 0.15s ease-out",
         }}
       >
         <div

@@ -13,29 +13,53 @@ export default function MathRenderer({
   const containerRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (window.katex && containerRef.current) {
-      try {
-        window.katex.render(latex, containerRef.current, {
-          throwOnError: false,
-          displayMode: false,
-          strict: false,
-          trust: true,
-        });
-      } catch (e) {
-        console.error("KaTeX error:", e);
-        if (containerRef.current) {
-          containerRef.current.textContent = latex;
+    let isMounted = true;
+    let timer: NodeJS.Timeout | null = null;
+
+    const renderKatex = () => {
+      if (!isMounted || !containerRef.current) return false;
+
+      if (window.katex) {
+        try {
+          window.katex.render(latex, containerRef.current, {
+            throwOnError: false,
+            displayMode: false,
+            strict: false,
+            trust: true,
+          });
+          return true;
+        } catch (e) {
+          console.warn("KaTeX render error:", e);
+          if (containerRef.current) {
+            containerRef.current.textContent = latex;
+          }
+          return true;
         }
       }
+      return false;
+    };
+
+    if (!renderKatex()) {
+      if (containerRef.current) {
+        containerRef.current.textContent = latex;
+      }
+      // Poll sampai KaTeX script CDN selesai dimuat
+      timer = setInterval(() => {
+        if (renderKatex() && timer) {
+          clearInterval(timer);
+        }
+      }, 100);
     }
+
+    return () => {
+      isMounted = false;
+      if (timer) clearInterval(timer);
+    };
   }, [latex, fontFamily, fontSize]);
 
-  const baselineShift = fontSize * 0.12;
-
-  // Gunakan seeded random agar TIDAK berubah setiap render
-  const rotation = seededRotation(`math-rot-${latex}`, roughness * 4);
-  const scaleVar =
-    1 + (seededRandom(`math-scale-${latex}`) - 0.5) * roughness * 0.05;
+  const baselineShift = fontSize * 0.1;
+  const rotation = seededRotation(`math-rot-${latex}`, roughness * 3.5);
+  const scaleVar = 1 + (seededRandom(`math-scale-${latex}`) - 0.5) * roughness * 0.04;
 
   const style: React.CSSProperties = {
     color,
@@ -54,7 +78,7 @@ export default function MathRenderer({
     <span
       ref={containerRef}
       data-latex={latex}
-      className="math-handwritten"
+      className="math-handwritten select-none"
       style={style}
     />
   );

@@ -4,6 +4,9 @@ import {
   Search,
   Loader2,
   Check,
+  Sliders,
+  Palette,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   FONT_OPTIONS,
@@ -11,7 +14,7 @@ import {
   INK_COLORS,
   LINE_COLORS,
 } from "../constants";
-import type { PaperSettings } from "../types";
+import type { PaperPattern, PaperSettings } from "../types";
 import { useFontLoader } from "../hooks/useFontLoader";
 
 interface FormattingToolsProps {
@@ -28,6 +31,7 @@ interface SliderProps {
   min: number;
   max: number;
   unit?: string;
+  step?: number;
   onChange: (val: number) => void;
 }
 
@@ -37,13 +41,14 @@ function Slider({
   min,
   max,
   unit = "px",
+  step = 1,
   onChange,
 }: SliderProps) {
   return (
     <div>
-      <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-500">
+      <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-600">
         <span>{label}</span>
-        <span className="font-bold text-gray-700">
+        <span className="font-bold text-gray-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
           {value}
           {unit}
         </span>
@@ -52,9 +57,10 @@ function Slider({
         type="range"
         min={min}
         max={max}
+        step={step}
         value={value}
         onChange={(e) => onChange(+e.target.value)}
-        className="w-full accent-blue-600 h-1.5 rounded-full cursor-pointer"
+        className="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-full cursor-pointer transition-all"
       />
     </div>
   );
@@ -134,26 +140,25 @@ function FontSelectDropdown({
     );
 
   return (
-    <div ref={dropdownRef} className="relative mt-3">
+    <div ref={dropdownRef} className="relative mt-2.5">
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen((o) => !o)}
         className={`
-          w-full flex items-center justify-between px-3 py-2.5
-          bg-gray-50 border rounded-xl text-sm transition-all
-          hover:border-blue-300
-          ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-200"}
+          w-full flex items-center justify-between px-3 py-2
+          bg-slate-50 border rounded-xl text-xs sm:text-sm transition-all
+          hover:border-blue-300 cursor-pointer
+          ${isOpen ? "border-blue-500 ring-2 ring-blue-100 bg-white" : "border-slate-200"}
         `}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[10px] text-gray-400 uppercase tracking-wider shrink-0">
-            Lainnya:
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0">
+            Katalog:
           </span>
           <span
-            className="truncate font-medium text-gray-700"
+            className="truncate font-semibold text-gray-800"
             style={{
-              fontFamily:
-                previewFont || currentFont,
+              fontFamily: previewFont || currentFont,
             }}
           >
             {previewFont || currentFont}
@@ -163,7 +168,7 @@ function FontSelectDropdown({
           {isLoading && (
             <Loader2
               size={14}
-              className="animate-spin text-blue-400"
+              className="animate-spin text-blue-500"
             />
           )}
           <ChevronDown
@@ -178,9 +183,9 @@ function FontSelectDropdown({
       {isOpen && (
         <div
           className="absolute z-50 top-full left-0 right-0 mt-1.5
-                     bg-white border border-gray-200 rounded-xl shadow-xl
+                     bg-white border border-gray-200 rounded-xl shadow-2xl
                      overflow-hidden"
-          style={{ maxHeight: "380px" }}
+          style={{ maxHeight: "360px" }}
         >
           {/* Search Bar */}
           <div className="sticky top-0 bg-white border-b border-gray-100 p-2 z-10">
@@ -194,11 +199,11 @@ function FontSelectDropdown({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari font..."
-                className="w-full pl-8 pr-3 py-2 text-xs bg-gray-50 border
-                           border-gray-200 rounded-lg focus:border-blue-400
-                           focus:ring-1 focus:ring-blue-200 outline-none
-                           transition-colors"
+                placeholder="Cari dari 40+ gaya font..."
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border
+                           border-slate-200 rounded-lg focus:border-blue-400
+                           focus:bg-white focus:ring-1 focus:ring-blue-200 outline-none
+                           transition-all"
               />
             </div>
           </div>
@@ -206,15 +211,15 @@ function FontSelectDropdown({
           {/* Font List */}
           <div
             className="overflow-y-auto"
-            style={{ maxHeight: "320px" }}
+            style={{ maxHeight: "300px" }}
           >
-            {/* Font utama yang sudah ada (jika cocok pencarian) */}
+            {/* Font utama */}
             {FONT_OPTIONS.some((f) =>
               f.toLowerCase().includes(search.toLowerCase())
             ) && (
               <div className="px-2 pt-2">
-                <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 px-2 mb-1">
-                  ★ Font Utama
+                <p className="text-[9px] font-black uppercase tracking-widest text-blue-600 px-2 mb-1">
+                  ★ Font Populer
                 </p>
                 {FONT_OPTIONS.filter((f) =>
                   f.toLowerCase().includes(search.toLowerCase())
@@ -225,12 +230,12 @@ function FontSelectDropdown({
                     onMouseEnter={() => handleHoverFont(font)}
                     onMouseLeave={() => setPreviewFont(null)}
                     className={`
-                      w-full flex items-center justify-between px-3 py-2
-                      rounded-lg text-sm transition-colors text-left
+                      w-full flex items-center justify-between px-3 py-1.5
+                      rounded-lg text-sm transition-colors text-left cursor-pointer
                       ${
                         currentFont === font
-                          ? "bg-blue-50 text-blue-700"
-                          : "hover:bg-gray-50 text-gray-700"
+                          ? "bg-blue-50 text-blue-700 font-bold"
+                          : "hover:bg-slate-50 text-gray-700"
                       }
                     `}
                     style={{ fontFamily: font }}
@@ -241,7 +246,7 @@ function FontSelectDropdown({
                     {currentFont === font && (
                       <Check
                         size={14}
-                        className="text-blue-500 shrink-0 ml-2"
+                        className="text-blue-600 shrink-0 ml-2"
                       />
                     )}
                   </button>
@@ -262,12 +267,12 @@ function FontSelectDropdown({
                     onMouseEnter={() => handleHoverFont(font)}
                     onMouseLeave={() => setPreviewFont(null)}
                     className={`
-                      w-full flex items-center justify-between px-3 py-2
-                      rounded-lg text-sm transition-colors text-left
+                      w-full flex items-center justify-between px-3 py-1.5
+                      rounded-lg text-sm transition-colors text-left cursor-pointer
                       ${
                         currentFont === font
-                          ? "bg-blue-50 text-blue-700"
-                          : "hover:bg-gray-50 text-gray-700"
+                          ? "bg-blue-50 text-blue-700 font-bold"
+                          : "hover:bg-slate-50 text-gray-700"
                       }
                     `}
                     style={{
@@ -281,7 +286,7 @@ function FontSelectDropdown({
                         `${font} - Contoh teks`
                       ) : (
                         <span className="flex items-center gap-2">
-                          <span className="font-sans">{font}</span>
+                          <span className="font-sans text-xs">{font}</span>
                           <span className="text-[9px] text-gray-400 font-sans">
                             (klik untuk muat)
                           </span>
@@ -291,7 +296,7 @@ function FontSelectDropdown({
                     {currentFont === font && (
                       <Check
                         size={14}
-                        className="text-blue-500 shrink-0 ml-2"
+                        className="text-blue-600 shrink-0 ml-2"
                       />
                     )}
                   </button>
@@ -302,20 +307,16 @@ function FontSelectDropdown({
             {/* Tidak ada hasil */}
             {!hasResults && (
               <div className="px-4 py-8 text-center">
-                <p className="text-sm text-gray-400">
-                  Tidak ditemukan font "
-                  <span className="font-semibold text-gray-500">
+                <p className="text-xs text-gray-400">
+                  Tidak ditemukan font &quot;
+                  <span className="font-semibold text-gray-600">
                     {search}
                   </span>
-                  "
-                </p>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Coba kata kunci lain
+                  &quot;
                 </p>
               </div>
             )}
 
-            {/* Spacer bawah */}
             <div className="h-2" />
           </div>
         </div>
@@ -339,6 +340,7 @@ export default function FormattingTools({
     showMarginLine,
     inkColor,
     lineColor,
+    paperPattern = "folio",
   } = settings;
 
   const { loadFont } = useFontLoader();
@@ -352,25 +354,28 @@ export default function FormattingTools({
   );
 
   return (
-    <section className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 space-y-6">
-      {/* ──── FONT SECTION (TIDAK DIUBAH LAYOUTNYA) ──── */}
+    <section className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-gray-200 space-y-5">
+      {/* ──── FONT SECTION ──── */}
       <div>
-        <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">
-          Font Tulis Tangan
-        </p>
+        <div className="flex items-center gap-2 mb-2.5">
+          <Sliders size={16} className="text-blue-600" />
+          <p className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+            Gaya Font Tulisan Tangan
+          </p>
+        </div>
 
-        {/* Grid tombol font utama — SAMA PERSIS seperti sebelumnya */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Grid tombol font utama */}
+        <div className="grid grid-cols-3 gap-1.5">
           {FONT_OPTIONS.map((f) => (
             <button
               key={f}
               onClick={() => handleFontSelect(f)}
               style={{ fontFamily: f }}
-              className={`p-2.5 border rounded-xl text-base transition-all
+              className={`p-2 border rounded-xl text-sm transition-all cursor-pointer truncate
                 ${
                   fontFamily === f
-                    ? "bg-blue-50 border-blue-500 text-blue-700 shadow-inner"
-                    : "bg-white border-gray-200 hover:border-gray-300 text-gray-700"
+                    ? "bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-xs"
+                    : "bg-slate-50/60 border-slate-200 hover:border-slate-300 text-gray-700"
                 }`}
             >
               {f.split(" ")[0]}
@@ -378,16 +383,44 @@ export default function FormattingTools({
           ))}
         </div>
 
-        {/* ──── SELECT DROPDOWN FONT TAMBAHAN (BARU!) ──── */}
-        {/* Diletakkan DI BAWAH grid font utama, SEJAJAR */}
+        {/* Dropdown font tambahan */}
         <FontSelectDropdown
           currentFont={fontFamily}
           onSelectFont={handleFontSelect}
         />
       </div>
 
-      {/* ──── SLIDERS & CONTROLS (TIDAK DIUBAH) ──── */}
-      <div className="space-y-4">
+      {/* ──── POLA KERTAS (FOLIO / GRID / POLOS) ──── */}
+      <div>
+        <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+          <FileSpreadsheet size={14} className="text-blue-600" />
+          Format Kertas
+        </p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {(
+            [
+              { id: "folio", label: "Folio Bergaris" },
+              { id: "grid", label: "Kotak-kotak" },
+              { id: "blank", label: "Polos (Blank)" },
+            ] as { id: PaperPattern; label: string }[]
+          ).map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onUpdate("paperPattern", item.id)}
+              className={`py-1.5 px-2 text-xs rounded-lg border font-medium transition-all cursor-pointer ${
+                paperPattern === item.id
+                  ? "bg-blue-50 border-blue-500 text-blue-700 font-bold"
+                  : "bg-slate-50 border-slate-200 text-gray-600 hover:bg-slate-100"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ──── SLIDERS & CONTROLS ──── */}
+      <div className="space-y-3.5 pt-1 border-t border-slate-100">
         <Slider
           label="Ukuran Font"
           value={fontSize}
@@ -397,7 +430,7 @@ export default function FormattingTools({
         />
 
         <Slider
-          label="Jarak Baris"
+          label="Jarak Baris Kertas"
           value={lineHeight}
           min={24}
           max={48}
@@ -405,9 +438,9 @@ export default function FormattingTools({
         />
 
         <div>
-          <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-500">
-            <span>Gaya Tulisan Tangan</span>
-            <span className="font-bold text-gray-700">
+          <div className="flex justify-between text-xs mb-1.5 font-medium text-gray-600">
+            <span>Variasi Alami Tulisan (Roughness)</span>
+            <span className="font-bold text-gray-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
               {Math.round(handwritingRoughness * 100)}%
             </span>
           </div>
@@ -419,15 +452,17 @@ export default function FormattingTools({
             onChange={(e) =>
               onUpdate("handwritingRoughness", +e.target.value / 100)
             }
-            className="w-full accent-blue-600 h-1.5 rounded-full cursor-pointer"
+            className="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-full cursor-pointer transition-all"
           />
-          <p className="text-[10px] text-gray-400 mt-1">
-            0% = rapi · 100% = sangat tidak rapi
-          </p>
+          <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <span>0% (Sangat Rapi)</span>
+            <span>50% (Alami)</span>
+            <span>100% (Kasual)</span>
+          </div>
         </div>
 
         <Slider
-          label="Margin Atas"
+          label="Margin Atas Header"
           value={marginTop}
           min={50}
           max={160}
@@ -435,7 +470,7 @@ export default function FormattingTools({
         />
 
         <Slider
-          label="Margin Kiri"
+          label="Margin Kiri Tulisan"
           value={paddingLeft}
           min={60}
           max={200}
@@ -443,43 +478,64 @@ export default function FormattingTools({
         />
 
         {/* Toggle garis margin */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-500">
-            Tampilkan Garis Margin
-          </span>
-          <button
-            role="switch"
-            aria-checked={showMarginLine}
-            onClick={() => onUpdate("showMarginLine", !showMarginLine)}
-            className={`relative w-10 h-5 rounded-full transition-colors
-                        focus:outline-none focus:ring-2 focus:ring-blue-400
-                        focus:ring-offset-1
-                        ${showMarginLine ? "bg-blue-500" : "bg-gray-300"}`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white
-                          rounded-full shadow transition-transform duration-200
-                          ${showMarginLine ? "translate-x-5" : "translate-x-0"}`}
-            />
-          </button>
-        </div>
+        {paperPattern !== "blank" && (
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs font-medium text-gray-600">
+              Garis Margin Merah Kiri
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showMarginLine}
+              onClick={() => onUpdate("showMarginLine", !showMarginLine)}
+              className={`relative w-9 h-5 rounded-full transition-colors cursor-pointer
+                          focus:outline-none focus:ring-2 focus:ring-blue-400
+                          ${showMarginLine ? "bg-blue-600" : "bg-slate-300"}`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white
+                            rounded-full shadow-xs transition-transform duration-200
+                            ${showMarginLine ? "translate-x-4" : "translate-x-0"}`}
+              />
+            </button>
+          </div>
+        )}
 
-        {/* Warna Tinta */}
-        <div>
-          <p className="text-xs font-medium text-gray-500 mb-2">
-            Warna Tinta
-          </p>
-          <div className="flex gap-2 flex-wrap">
+        {/* Warna Tinta Pulpen */}
+        <div className="pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+              <Palette size={13} className="text-blue-600" />
+              Warna Tinta Pulpen
+            </span>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="custom-ink-picker"
+                title="Pilih warna kustom"
+                className="text-[10px] text-blue-600 hover:underline cursor-pointer"
+              >
+                Kustom:
+              </label>
+              <input
+                id="custom-ink-picker"
+                type="color"
+                value={inkColor}
+                onChange={(e) => onUpdate("inkColor", e.target.value)}
+                className="w-5 h-5 rounded border border-gray-300 cursor-pointer p-0 overflow-hidden"
+              />
+            </div>
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
             {INK_COLORS.map((c) => (
               <button
                 key={c}
                 onClick={() => onUpdate("inkColor", c)}
                 aria-label={`Pilih warna tinta ${c}`}
-                className={`w-7 h-7 rounded-full border-2 transition-all
+                className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer
                   ${
-                    inkColor === c
-                      ? "border-blue-400 scale-125 ring-2 ring-blue-200"
-                      : "border-transparent hover:scale-110"
+                    inkColor.toLowerCase() === c.toLowerCase()
+                      ? "border-blue-500 scale-125 ring-2 ring-blue-200"
+                      : "border-white hover:scale-110 shadow-xs"
                   }`}
                 style={{ backgroundColor: c }}
               />
@@ -487,28 +543,49 @@ export default function FormattingTools({
           </div>
         </div>
 
-        {/* Warna Garis */}
-        <div>
-          <p className="text-xs font-medium text-gray-500 mb-2">
-            Warna Garis Kertas
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            {LINE_COLORS.map((item) => (
-              <button
-                key={item.color}
-                onClick={() => onUpdate("lineColor", item.color)}
-                aria-label={`Pilih warna garis ${item.label}`}
-                className={`w-7 h-7 rounded-full border-2 transition-all
-                  ${
-                    lineColor === item.color
-                      ? "border-blue-400 scale-125 ring-2 ring-blue-200"
-                      : "border-gray-200 hover:scale-110"
-                  }`}
-                style={{ backgroundColor: item.color }}
-              />
-            ))}
+        {/* Warna Garis Kertas */}
+        {paperPattern !== "blank" && (
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-600">
+                Warna Garis Kertas
+              </span>
+              <div className="flex items-center gap-1">
+                <label
+                  htmlFor="custom-line-picker"
+                  title="Pilih warna garis kustom"
+                  className="text-[10px] text-blue-600 hover:underline cursor-pointer"
+                >
+                  Kustom:
+                </label>
+                <input
+                  id="custom-line-picker"
+                  type="color"
+                  value={lineColor}
+                  onChange={(e) => onUpdate("lineColor", e.target.value)}
+                  className="w-5 h-5 rounded border border-gray-300 cursor-pointer p-0 overflow-hidden"
+                />
+              </div>
+            </div>
+            <div className="flex gap-1.5 flex-wrap">
+              {LINE_COLORS.map((item) => (
+                <button
+                  key={item.color}
+                  onClick={() => onUpdate("lineColor", item.color)}
+                  title={item.label}
+                  aria-label={`Pilih warna garis ${item.label}`}
+                  className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer
+                    ${
+                      lineColor.toLowerCase() === item.color.toLowerCase()
+                        ? "border-blue-500 scale-125 ring-2 ring-blue-200"
+                        : "border-white hover:scale-110 shadow-xs"
+                    }`}
+                  style={{ backgroundColor: item.color }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
